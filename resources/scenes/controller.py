@@ -12,7 +12,7 @@ from asciimatics.event import Event, KeyboardEvent
 from asciimatics.renderers import SpeechBubble
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
-from playsound import playsound
+# from playsound import playsound
 
 import resources.exceptions as exceptions
 # from resources.generation import even_random_distribution as r_distribution
@@ -54,13 +54,13 @@ DIRECTIONAL_MANEUVER_MAPPINGS = [
     },
 ]
 
-SFX_FOLDER = Path("resources", "sfx")
-SFX = {
-    "footsteps": tuple((SFX_FOLDER / "footsteps").iterdir()),
-    "tag": SFX_FOLDER / "tag.wav",
-    "wall_collision": SFX_FOLDER / "wall.wav",
-}
-ps_threads = {k: None for k in SFX.keys()}
+# SFX_FOLDER = Path("resources", "sfx")
+# SFX = {
+#     "footsteps": tuple((SFX_FOLDER / "footsteps").iterdir()),
+#     "tag": SFX_FOLDER / "tag.wav",
+#     "wall_collision": SFX_FOLDER / "wall.wav",
+# }
+# ps_threads = {k: None for k in SFX.keys()}
 
 
 _palette_256 = [(i, Screen.A_NORMAL if i < 14 else Screen.A_BOLD) for i in range(232, 256)]
@@ -68,19 +68,19 @@ _palette_256 = [(i, Screen.A_NORMAL if i < 14 else Screen.A_BOLD) for i in range
 # texturing = r_distribution([' ', '.', ','], [80, 10, 10], 1000)
 
 
-def ps(sound_type: str) -> None:
-    """Play a sound according to the sound type."""
-    global ps_threads
-    ps_thread = ps_threads[sound_type]
-
-    if ps_thread is None or not ps_thread.is_alive():  # Doesn't allow overlaps
-        value = SFX[sound_type]
-        # Choose a random file if it's a tuple of files (ex. footsteps)
-        arg = choice(value) if isinstance(value, tuple) else value
-
-        # Change the global dictionary as well for alive testing
-        ps_thread = ps_threads[sound_type] = Thread(target=playsound, args=(str(arg),))
-        ps_thread.start()
+# def ps(sound_type: str) -> None:
+#     """Play a sound according to the sound type."""
+#     global ps_threads
+#     ps_thread = ps_threads[sound_type]
+#
+#     if ps_thread is None or not ps_thread.is_alive():  # Doesn't allow overlaps
+#         value = SFX[sound_type]
+#         # Choose a random file if it's a tuple of files (ex. footsteps)
+#         arg = choice(value) if isinstance(value, tuple) else value
+#
+#         # Change the global dictionary as well for alive testing
+#         ps_thread = ps_threads[sound_type] = Thread(target=playsound, args=(str(arg),))
+#         ps_thread.start()
 
 
 class Map(Effect):
@@ -112,8 +112,8 @@ class Map(Effect):
         # updates when the screen changes so it won't work as a way
         # to finish the game
         self.cur_frame = 0
-        self.ligh_effect_enabled = screen.colours >= 255
-        self.background = _palette_256[0][0] if self.ligh_effect_enabled else Screen.COLOUR_BLACK
+        self.light_effect_enabled = screen.colours >= 255
+        self.background = _palette_256[0][0] if self.light_effect_enabled else Screen.COLOUR_BLACK
 
     def light_intensity(self, x1: int, y1: int, n: int) -> float:
         """Intensity of the light at point x1, y1"""
@@ -127,7 +127,7 @@ class Map(Effect):
         # Last minute code lel
         intens = ((x1 - (self.screen.width//2)) ** 2
                   + ((y1 - (self.screen.height//2)) ** 2))**0.5
-        intens = (abs(n-intens)/n)**(2.4)
+        intens = (abs(n-intens)/n) ** 2.4
         return min(0.99, intens)
 
         # dist = ((x1 - (self.screen.width//2)) ** 2
@@ -158,7 +158,7 @@ class Map(Effect):
             k = 0
             for j, char in enumerate(line):
                 k += 1
-                if self.ligh_effect_enabled:
+                if self.light_effect_enabled:
                     intensity = self.light_intensity(len(subline)+j, offset_y + i, self.vision)
                     intensity = int(intensity*len(_palette_256))
                     colour, attr = _palette_256[intensity]
@@ -349,20 +349,20 @@ class GameController(Scene):
                     collision = self.cast_ray(dm_mapping["raycast_direction"])
 
                     if collision == GameController.EMPTY_SPACE:
-                        ps("footsteps")
+                        # ps("footsteps")
 
                         axis, move = dm_mapping["map_movement"]
                         # Using setattr and getattr for dynamic attribute assignment
                         attr = (self.map, f"player_{axis}")
                         setattr(*attr, getattr(*attr) + move)
                     elif collision in GameController.WALL:
-                        ps("wall_collision")
-
+                        # ps("wall_collision")
+                        pass
                     recognised = True
                     break
 
                 if key_code in dm_mapping["tag_trigger_keys"]:
-                    ps("tag")
+                    # ps("tag")
 
                     collision = self.cast_ray(dm_mapping["raycast_direction"])
                     if collision in GameController.WALL:
